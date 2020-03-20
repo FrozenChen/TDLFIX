@@ -34,7 +34,7 @@ int main(
 {
    int yyvalue= 0;
 
-   strcpy(file_name, argv[ 1]);
+   strcpy(file_name, argv[ 0]);
 
    if( argc != 2)
    {
@@ -58,7 +58,7 @@ int main(
 }
 
 void P(void)
-{
+{ 
     symbol= get_yylex();
     if(symbol == PROGRAM)
     {
@@ -81,13 +81,15 @@ void P(void)
 }
 
 void LD(void)
-{
+{  
+
     D();
     LDP();
 }
 
 void LDP(void)
 {
+
     symbol= get_yylex();
     if(symbol == INT || symbol == REAL)   
     {
@@ -111,6 +113,7 @@ void D(void)
         else
         {
             fprintf(stderr, "file \"%s\" : expected ';' ,\n", file_name);
+
             exit(EXIT_FAILURE);
         }
     }
@@ -123,40 +126,61 @@ void D(void)
 
 void LV(void)
 {
+
    symbol = get_yylex();
    if(symbol==ID)
    {
-      unget_yylex();
-      LVP();
+      symbol = get_yylex();
+      if(symbol== ','){
+         unget_yylex();
+         LVP();
+      }
+      else
+      {
+       
+       fprintf(stderr, "file \"%s\" : expected ID\n", file_name);
+       exit(EXIT_FAILURE);
+      }
    } 
-   else 
-      unget_yylex();
+   else
+   {
+      fprintf(stderr, "file \"%s\" : expected ID\n", file_name);
+       exit(EXIT_FAILURE);
+   }
 }
 
 void LVP(void)
 {
+
    symbol = get_yylex();
-   if(symbol== ',' && symbol== ID)
+   if(symbol== ',')
    {
-      unget_yylex();
-      LVP();
+      symbol =get_yylex();
+      if(symbol == ID){
+      	LVP();
+      }
+       
    } 
    else 
       unget_yylex();
 }
 
 void LS(void)
-{
+{ 
+
    S();
    LSP();
 }
 
 void LSP(void)
 {
+
+
    symbol = get_yylex();
    if(symbol==READ || symbol == WRITE || symbol==WRITELN)
-   {
+   {  
       unget_yylex();
+      S();
       LSP();
    } 
    else 
@@ -174,16 +198,27 @@ void S(void)
          symbol= get_yylex();
          if(symbol==';')
             return;
+         else{ 
+             fprintf(stderr, "file \"%s\" : expected ';'\n", file_name);
+             exit(EXIT_FAILURE);
+         }
       }
+      else {
+         fprintf(stderr, "file \"%s\" : expected ID\n", file_name);
+         exit(EXIT_FAILURE);
+         }
    }
 
    else if(symbol==WRITE)
    {
-      symbol= get_yylex();
       LP();
       symbol= get_yylex();
       if(symbol==';')
          return;
+      else {
+         fprintf(stderr, "file \"%s\" : expected ';'\n", file_name);
+         exit(EXIT_FAILURE);
+      }
    }
 
    else if(symbol==WRITELN)
@@ -191,10 +226,15 @@ void S(void)
       symbol= get_yylex();
       if(symbol==';')
          return;
+      else {
+      fprintf(stderr, "file \"%s\" : expected ';'\n", file_name);
+         exit(EXIT_FAILURE);
+      }
    }
-
-   else 
-      unget_yylex();        
+   else {
+         fprintf(stderr, "file \"%s\" : expected ';'\n", file_name);
+         exit(EXIT_FAILURE);
+      }
 }
 
 void LP (void)
@@ -204,11 +244,12 @@ void LP (void)
 }
 
 void LPP (void)
-{
+{ 
+
    symbol = get_yylex();
    if(symbol== ',')
    {
-      unget_yylex();
+      
       PAR();
       LPP();
    } 
@@ -218,9 +259,15 @@ void LPP (void)
 
 void PAR(void)
 {
+
    symbol = get_yylex();
    if(symbol== CONST_CHAR || symbol== ID || symbol== CONST_INT || symbol==CONST_REAL)
       return;
+   else
+     {
+         fprintf(stderr, "file \"%s\" : expected CONST_CHAR, ID,CONST_INT or CONST_REAL\n", file_name);
+         exit(EXIT_FAILURE);
+}
 }
 
 int get_yylex( void)
@@ -238,7 +285,3 @@ void unget_yylex( void)
 {
   symbol_devuelto = TRUE;
 }
-   
-
-
-
